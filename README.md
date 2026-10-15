@@ -1,11 +1,12 @@
 # Atelier Commerce API
 
-A locally runnable commerce storefront and REST API built with FastAPI, SQLAlchemy 2, Pydantic 2, SQLite, and a responsive static interface.
+A locally runnable commerce storefront and REST API built with FastAPI, PyMongo, MongoDB, Pydantic 2, and a responsive static interface.
 
 ## Requirements
 
 - Python 3.11 or newer
-- Windows PowerShell (commands below are PowerShell-native)
+- A MongoDB server or MongoDB Atlas database
+- Windows PowerShell
 
 ## Setup and run
 
@@ -17,6 +18,11 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 Copy-Item .env.example .env
+```
+
+Set `MONGODB_URI` in `.env` to your MongoDB connection URI. If the URI contains a database name, the app uses it; otherwise it uses `MONGODB_DATABASE` or `atelier_commerce`.
+
+```powershell
 python -m pip install -r requirements.txt
 python -m scripts.seed_data
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
@@ -24,13 +30,13 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 Open `http://127.0.0.1:8000/` for the storefront. Choose **API Guide** in the top navigation to read the complete store API reference on the site. Swagger is at `http://127.0.0.1:8000/docs`, ReDoc at `http://127.0.0.1:8000/redoc`, and OpenAPI JSON at `http://127.0.0.1:8000/openapi.json`. The same reference is available as [API_REFERENCE.md](API_REFERENCE.md).
 
-To run the test suite in another PowerShell window:
+To copy records from the previous local SQLite database into MongoDB, set `MONGODB_URI` and run:
 
 ```powershell
-Set-Location "C:\path\to\procto-api"
-.\.venv\Scripts\Activate.ps1
-python -m pytest -q
+python -m scripts.migrate_sqlite_to_mongo
 ```
+
+The migration reads `commerce.db` and upserts its records into MongoDB. It leaves the SQLite file in place.
 
 ## Test accounts
 
@@ -69,4 +75,4 @@ The intentionally unsafe route is excluded from OpenAPI and is disabled by defau
 
 ## Configuration
 
-Copy `.env.example` to `.env` and set a unique `SECRET_KEY` for persistent local use. `DATABASE_URL` defaults to `sqlite:///./commerce.db`. The documented server command binds only to `127.0.0.1:8000`.
+Copy `.env.example` to `.env`, set `MONGODB_URI` to your MongoDB connection URI, and set a unique `SECRET_KEY` for persistent use. The documented server command binds only to `127.0.0.1:8000`.
